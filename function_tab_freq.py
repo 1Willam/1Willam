@@ -62,12 +62,15 @@ def tab_freq(dataframe, column=0, k=0, i=0):
       acum = df_frequency.at[x, 'cumulative frequency']
       x += 1    
       f.clear()
-  # Histograma (diagrama de barras del dataframe)
-  df_frequency.plot.bar(x=f'{b}',
+  # Histograma PANDAS (diagrama de barras del dataframe)
+  df_frequency.plot.bar(x=b,
                         y='frequency',
                         rot=0,
                         width=0.9,
                         figsize=(8,6)
                         ).set_title(f'Histogram \n{b}')
-  # Mostrar la tabla de fecuencias
-  print(f"K={K}, \nI={I}, \nlim={lim}, \nmin={min(label)}, max={max(label)}\n", df_frequency)
+  # Histograma PLOTLY (diagrama de barras del dataframe)
+  df_frequency[b]= df_frequency[b].astype('str')
+  histograma = px.bar(df_frequency, x=b, y='frequency')
+  # Mostrar valores
+  print(f"K={K}, \nI={I}, \nlim={lim}, \nmin={min(label)}, max={max(label)}\n{df_frequency}\n{histograma.show()}")
