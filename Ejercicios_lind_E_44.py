@@ -47,8 +47,8 @@ r_ap_M = pd.Interval(1.5*fs + q3, 3*fs + q3, closed="both")
 r_ap_m = pd.Interval(q1 - 3*fs, q1 - 1.5*fs, closed="both")
 # pd.Interval() nos regresa un intervalo de valores que ingresemos
 
-v_md = df_goodyear[(df_goodyear["Price"] == r_ap_M)|
-                   (df_goodyear["Price"] == r_ap_m)][["id", "Price"]]
+v_md = df_goodyear[(df_goodyear["Price"].between(r_ap_M.left, r_ap_M.right, inclusive=r_ap_M.closed))|
+                   (df_goodyear["Price"].between(r_ap_m.left, r_ap_m.right, inclusive=r_ap_m.closed))][['id','Price']]
 
 #### DIAGRAMA DE CAJA Y BIGOTE - (PANDAS) ####
 
@@ -93,7 +93,3 @@ pl_sct = px.scatter(
   ).show()
 """
 pl_sct.show()
-
-
-
-
