@@ -5,9 +5,6 @@ Created on Sat Jun  3 22:01:06 2023
 @author: DELL
 """
 #%%
-import sys 
-sys.path.append("/Docs_python/conexion_sql_datebase")
-from conexion_sql_datebase import goodyear
 import plotly.io as pio
 pio.renderers.default = "browser"
 import plotly.express as px
@@ -15,11 +12,17 @@ import numpy as np
 import pandas as pd
 import seaborn as sn
 
+
+import sys 
+sys.path.append("/Docs_python/conexion_sql_datebase")
+from conexion_sql_datebase import goodyear
 df_goodyear = pd.DataFrame(goodyear)
-
+del goodyear
 #%%
-
-def tab_freq(dataframe, column=0, k=0, i=0):
+"""## FUNCION QUE RESUELVE TABLA DE DISTRIBUCION DE FRECUENCIAS ABSOLUTAS,
+      RELATIVAS Y ACUMULATIVAS DE VARIABLES CUANTITATIVAS ## """
+    
+def tabfreq_cuan(dataframe, column=0, k=0, i=0):
   # Variables
   b = dataframe.axes[1][column]
   label = dataframe[f"{b}"]
@@ -36,32 +39,30 @@ def tab_freq(dataframe, column=0, k=0, i=0):
   lim_s = pd.interval_range(start=int(np.floor(min(label))), periods=K-1, freq=I, closed='left')
   lim_i = pd.interval_range(start=(K-1)*I+int(np.floor(min(label))), periods=1, freq=I, closed='both')
   lim = lim_s.append(lim_i)
-  longitud = len(label)
   x = 0
   f = []
   acum = 0
   # Agregamos columnas al dataframe
   df_frequency = pd.DataFrame({
-    f'{b}':lim,
-    'frequency':np.nan,
-    'relative frequency':np.nan,
-    'cumulative frequency':np.nan
-    })
+    f'{b}':lim})
   # Agregamos valores al dataframe
+  df_frequency['frequency']=df_frequency[b].apply(
+    lambda x:df_goodyear[df_goodyear[b].between(x.left,x.right,inclusive=x.closed)]['Price'].size
+    )
+  df_frequency['relative frequency']=df_frequency['frequency'].apply(
+    lambda x:np.round(x/np.sum(df_frequency['frequency']),3)
+    )
+    
   while x < len(lim):
-      for indice in label:
+    for indice in label:
         s = df_frequency.at[x, f'{b}']
         if indice in s:
           f.append(indice)
-      # valores de Frecuencias absolutas
-      df_frequency.at[x, 'frequency']=len(f)
-      # Valores de Frecuencias relativas
-      df_frequency.at[x, 'relative frequency']=np.round(len(f)/longitud,2)
       # Valores de Frecuencias acumulativas
-      df_frequency.at[x, 'cumulative frequency']=len(f)+acum
-      acum = df_frequency.at[x, 'cumulative frequency']
-      x += 1    
-      f.clear()
+    df_frequency.at[x, 'cumulative frequency']=len(f)+acum
+    acum = df_frequency.at[x, 'cumulative frequency']
+    x += 1    
+    f.clear()
   # Histograma PANDAS (diagrama de barras del dataframe)
   df_frequency.plot.bar(x=b,
                         y='frequency',
